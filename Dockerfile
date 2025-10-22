@@ -13,7 +13,7 @@ RUN --mount=type=cache,target=/root/.cache/pip \
 
 # Install vLLM (switching back to pip installs since issues that required building fork are fixed and space optimization is not as important since caching) and FlashInfer 
 RUN python3 -m pip install --upgrade vllm && \
-    python3 -m pip install flashinfer
+    (python3 -m pip install flashinfer -i https://flashinfer.ai/whl/cu121/torch2.3 || echo "FlashInfer not available for this architecture, continuing without it")
 
 # Install kvcached for multi-model GPU memory sharing
 RUN python3 -m pip install kvcached --no-build-isolation
