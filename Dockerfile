@@ -1,7 +1,7 @@
 FROM nvidia/cuda:12.1.0-base-ubuntu22.04 
 
 RUN apt-get update -y \
-    && apt-get install -y python3-pip
+    && apt-get install -y python3-pip git
 
 RUN ldconfig /usr/local/cuda-12.1/compat/
 
@@ -16,7 +16,8 @@ RUN python3 -m pip install --upgrade vllm && \
     (python3 -m pip install flashinfer -i https://flashinfer.ai/whl/cu121/torch2.3 || echo "FlashInfer not available for this architecture, continuing without it")
 
 # Install kvcached for multi-model GPU memory sharing
-RUN python3 -m pip install kvcached --no-build-isolation
+RUN python3 -m pip install --upgrade pip setuptools wheel && \
+    python3 -m pip install git+https://github.com/ovg-project/kvcached.git --no-build-isolation
 
 # Setup for Option 2: Building the Image with the Model included
 ARG MODEL_NAME=""
