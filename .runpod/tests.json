@@ -27,6 +27,67 @@
         }
       },
       "timeout": 30000
+    },
+    {
+      "name": "multi_model_list_test",
+      "input": {
+        "openai_route": "/v1/models",
+        "openai_input": {}
+      },
+      "timeout": 15000
+    },
+    {
+      "name": "multi_model_native_test_model_1",
+      "input": {
+        "prompt": "Write a haiku about technology.",
+        "model": "HuggingFaceTB/SmolLM2-135M-Instruct",
+        "sampling_params": {
+          "max_tokens": 50,
+          "temperature": 0.7
+        }
+      },
+      "timeout": 30000
+    },
+    {
+      "name": "multi_model_native_test_model_2",
+      "input": {
+        "prompt": "Explain photosynthesis briefly.",
+        "model": "HuggingFaceTB/SmolLM2-360M-Instruct",
+        "sampling_params": {
+          "max_tokens": 100,
+          "temperature": 0.3
+        }
+      },
+      "timeout": 30000
+    },
+    {
+      "name": "multi_model_openai_test_by_served_name",
+      "input": {
+        "openai_route": "/v1/chat/completions",
+        "openai_input": {
+          "model": "smollm-135m",
+          "messages": [
+            {
+              "role": "user",
+              "content": "What is machine learning?"
+            }
+          ],
+          "max_tokens": 50,
+          "temperature": 0.5
+        }
+      },
+      "timeout": 30000
+    },
+    {
+      "name": "multi_model_invalid_model_test",
+      "input": {
+        "prompt": "This should fail.",
+        "model": "non-existent-model",
+        "sampling_params": {
+          "max_tokens": 10
+        }
+      },
+      "timeout": 15000
     }
   ],
   "config": {
@@ -34,8 +95,40 @@
     "gpuCount": 1,
     "env": [
       {
-        "key": "MODEL_NAME",
+        "key": "ENABLE_KVCACHED",
+        "value": "true"
+      },
+      {
+        "key": "KVCACHED_AUTOPATCH",
+        "value": "1"
+      },
+      {
+        "key": "KVCACHED_IPC_NAME",
+        "value": "VLLM"
+      },
+      {
+        "key": "MODEL_1_NAME",
         "value": "HuggingFaceTB/SmolLM2-135M-Instruct"
+      },
+      {
+        "key": "MODEL_1_SERVED_NAME",
+        "value": "smollm-135m"
+      },
+      {
+        "key": "MODEL_2_NAME",
+        "value": "HuggingFaceTB/SmolLM2-360M-Instruct"
+      },
+      {
+        "key": "MODEL_2_SERVED_NAME",
+        "value": "smollm-360m"
+      },
+      {
+        "key": "GPU_MEMORY_UTILIZATION",
+        "value": "0.7"
+      },
+      {
+        "key": "MAX_MODEL_LEN",
+        "value": "1024"
       }
     ],
     "allowedCudaVersions": [

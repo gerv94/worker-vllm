@@ -2,6 +2,86 @@
 
 Complete guide to all environment variables and configuration options for worker-vllm.
 
+## Multi-Model Support with kvcached
+
+worker-vllm now supports serving multiple models simultaneously with elastic GPU memory sharing via kvcached. Models are loaded lazily on first request and share GPU memory efficiently.
+
+### kvcached Configuration
+
+| Variable                | Default | Type   | Description                                           |
+| ----------------------- | ------- | ------ | ----------------------------------------------------- |
+| `ENABLE_KVCACHED`      | `false` | `bool` | Enable kvcached for elastic GPU memory sharing        |
+| `KVCACHED_AUTOPATCH`   | `0`     | `int`  | Auto-patch vLLM for kvcached compatibility            |
+| `KVCACHED_IPC_NAME`    | None    | `str`  | IPC name for kvcached (recommended: `VLLM`)          |
+
+### Multi-Model Configuration
+
+There are three ways to configure models:
+
+#### 1. Single Model (Existing behavior)
+```bash
+MODEL_NAME=HuggingFaceTB/SmolLM2-135M-Instruct
+OPENAI_SERVED_MODEL_NAME_OVERRIDE=smollm-135m  # Optional custom name for OpenAI API
+```
+
+#### 2. Indexed Models (Recommended for per-model settings)
+```bash
+# Model 1
+MODEL_1_NAME=HuggingFaceTB/SmolLM2-135M-Instruct
+MODEL_1_SERVED_NAME=smollm-135m
+MODEL_1_MAX_MODEL_LEN=2048
+
+# Model 2
+MODEL_2_NAME=HuggingFaceTB/SmolLM2-1.7B-Instruct
+MODEL_2_SERVED_NAME=smollm-1.7b
+MODEL_2_MAX_MODEL_LEN=4096
+```
+
+#### 3. Comma-Separated Models (Simple setup)
+```bash
+MODEL_NAMES=HuggingFaceTB/SmolLM2-135M-Instruct,HuggingFaceTB/SmolLM2-1.7B-Instruct
+```
+
+### Per-Model Configuration Variables
+
+For indexed models, you can override settings per model:
+
+| Variable Pattern              | Type     | Description                                |
+| ----------------------------- | -------- | ------------------------------------------ |
+| `MODEL_{N}_NAME`             | `str`    | Model repository path                      |
+| `MODEL_{N}_SERVED_NAME`      | `str`    | Name exposed via OpenAI API               |
+| `MODEL_{N}_MAX_MODEL_LEN`    | `int`    | Maximum context length for this model     |
+| `MODEL_{N}_QUANTIZATION`     | `str`    | Quantization method for this model        |
+| `MODEL_{N}_DTYPE`            | `str`    | Data type for this model                  |
+| `MODEL_{N}_GPU_MEMORY_UTILIZATION` | `float` | GPU memory usage for this model    |
+| `MODEL_{N}_TENSOR_PARALLEL_SIZE` | `int` | Tensor parallelism for this model      |
+
+### Multi-Model API Usage
+
+#### OpenAI API
+```bash
+# List available models
+curl http://localhost:8000/v1/models
+
+# Use specific model
+curl http://localhost:8000/v1/chat/completions \
+  -d '{"model": "smollm-135m", "messages": [...]}'
+```
+
+#### Native vLLM API
+```bash
+# Use model by name or served name
+curl http://localhost:8000/ \
+  -d '{"model": "HuggingFaceTB/SmolLM2-135M-Instruct", "prompt": "..."}'
+```
+
+### Memory Considerations
+
+- **Single Model**: Use `GPU_MEMORY_UTILIZATION=0.95` (default)
+- **Multi-Model**: Use `GPU_MEMORY_UTILIZATION=0.6-0.8` to leave room for kvcached elasticity
+- **Lazy Loading**: Models load on first request with higher initial latency
+- **Memory Sharing**: kvcached dynamically allocates/reclaims KV cache memory between models
+
 ## LLM Settings
 
 | Variable                       | Default             | Type/Choices                                                | Description                                                                     |

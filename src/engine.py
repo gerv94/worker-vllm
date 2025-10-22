@@ -253,7 +253,12 @@ class OpenAIvLLMEngine(vLLMEngine):
             yield create_error_response("Invalid route").model_dump()
     
     async def _handle_model_request(self):
-        models = await self.serving_models.show_available_models()
+        # Use multi-model serving for /v1/models endpoint
+        from multi_model_serving import MultiModelServingModels
+        from model_manager import get_model_manager
+        
+        multi_model_serving = MultiModelServingModels(get_model_manager())
+        models = await multi_model_serving.show_available_models()
         return models.model_dump()
     
     async def _handle_chat_or_completion_request(self, openai_request: JobInput):

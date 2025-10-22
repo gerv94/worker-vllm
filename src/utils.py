@@ -61,6 +61,18 @@ class JobInput:
         self.min_batch_size = int(min_batch_size) if min_batch_size else None 
         self.openai_route = job.get("openai_route")
         self.openai_input = job.get("openai_input")
+        
+        # Model selection logic
+        self.model = None
+        if self.openai_route and self.openai_input:
+            # For OpenAI routes, get model from the request body
+            self.model = self.openai_input.get("model")
+        else:
+            # For native vLLM routes, get model from job input
+            self.model = job.get("model")
+        
+        # Store for validation after model manager is available
+        self._requested_model = self.model
 class DummyState:
     def __init__(self):
         self.request_metadata = None
