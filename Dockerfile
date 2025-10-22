@@ -17,7 +17,7 @@ RUN python3 -m pip install --upgrade vllm && \
 
 # Install kvcached for multi-model GPU memory sharing
 RUN python3 -m pip install --upgrade pip setuptools wheel && \
-    python3 -m pip install git+https://github.com/ovg-project/kvcached.git --no-build-isolation
+    python3 -m pip install kvcached --no-build-isolation
 
 # Setup for Option 2: Building the Image with the Model included
 ARG MODEL_NAME=""
