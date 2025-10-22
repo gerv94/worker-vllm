@@ -1,23 +1,10 @@
-FROM nvidia/cuda:12.1.0-base-ubuntu22.04 
+FROM ghcr.io/ovg-project/kvcached-vllm:latest 
 
-RUN apt-get update -y \
-    && apt-get install -y python3-pip git
-
-RUN ldconfig /usr/local/cuda-12.1/compat/
-
-# Install Python dependencies
+# Install Python dependencies (avoid reinstalling torch/vllm from base image)
 COPY builder/requirements.txt /requirements.txt
 RUN --mount=type=cache,target=/root/.cache/pip \
     python3 -m pip install --upgrade pip && \
     python3 -m pip install --upgrade -r /requirements.txt
-
-# Install vLLM (switching back to pip installs since issues that required building fork are fixed and space optimization is not as important since caching) and FlashInfer 
-RUN python3 -m pip install --upgrade vllm && \
-    (python3 -m pip install flashinfer -i https://flashinfer.ai/whl/cu121/torch2.3 || echo "FlashInfer not available for this architecture, continuing without it")
-
-# Install kvcached for multi-model GPU memory sharing
-RUN python3 -m pip install --upgrade pip setuptools wheel && \
-    python3 -m pip install kvcached --no-build-isolation
 
 # Setup for Option 2: Building the Image with the Model included
 ARG MODEL_NAME=""
