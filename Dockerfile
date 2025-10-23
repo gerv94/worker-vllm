@@ -1,10 +1,20 @@
-FROM ghcr.io/ovg-project/kvcached-vllm:latest 
+FROM nvidia/cuda:12.4.1-devel-ubuntu22.04 
 
-# Install Python dependencies (avoid reinstalling torch/vllm from base image)
+RUN apt-get update -y \
+    && apt-get install -y --no-install-recommends \
+       python3-pip git build-essential python3-dev cmake ninja-build pkg-config \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Python dependencies and GPU stack pinned to CUDA 12.4
 COPY builder/requirements.txt /requirements.txt
 RUN --mount=type=cache,target=/root/.cache/pip \
-    python3 -m pip install --upgrade pip && \
-    python3 -m pip install --upgrade -r /requirements.txt
+    python3 -m pip install --upgrade pip setuptools wheel && \
+    python3 -m pip install --index-url https://download.pytorch.org/whl/cu124 \
+        torch==2.7.0 torchvision==0.22.0 torchaudio==2.7.0 && \
+    python3 -m pip install --upgrade -r /requirements.txt && \
+    python3 -m pip install vllm==0.11.0 && \
+    (python3 -m pip install flashinfer -i https://flashinfer.ai/whl/cu124/torch2.7 || echo "FlashInfer not available for this architecture, continuing without it") && \
+    python3 -m pip install kvcached --no-build-isolation
 
 # Setup for Option 2: Building the Image with the Model included
 ARG MODEL_NAME=""
