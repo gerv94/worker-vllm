@@ -9,11 +9,11 @@ RUN apt-get update -y \
 COPY builder/requirements.txt /requirements.txt
 RUN --mount=type=cache,target=/root/.cache/pip \
     python3 -m pip install --upgrade pip setuptools wheel && \
-    python3 -m pip install --index-url https://download.pytorch.org/whl/cu124 \
-        torch==2.7.0 torchvision==0.22.0 torchaudio==2.7.0 && \
+python3 -m pip install --index-url https://download.pytorch.org/whl/cu124 \
+        torch==2.6.0 torchvision==0.21.0 torchaudio==2.6.0 && \
     python3 -m pip install --upgrade -r /requirements.txt && \
     python3 -m pip install vllm==0.11.0 && \
-    (python3 -m pip install flashinfer -i https://flashinfer.ai/whl/cu124/torch2.7 || echo "FlashInfer not available for this architecture, continuing without it") && \
+(python3 -m pip install flashinfer -i https://flashinfer.ai/whl/cu124/torch2.6 || echo "FlashInfer not available for this architecture, continuing without it") && \
     python3 -m pip install kvcached --no-build-isolation
 
 # Setup for Option 2: Building the Image with the Model included
