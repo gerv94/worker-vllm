@@ -3,8 +3,7 @@ import json
 import logging
 from torch.cuda import device_count
 from vllm import AsyncEngineArgs
-from vllm.model_executor.model_loader.tensorizer import TensorizerConfig
-from src.utils import convert_limit_mm_per_prompt
+from utils import convert_limit_mm_per_prompt
 
 RENAME_ARGS_MAP = {
     "MODEL_NAME": "model",

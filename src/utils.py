@@ -3,7 +3,6 @@ import logging
 from http import HTTPStatus
 from functools import wraps
 from time import time
-from vllm.entrypoints.openai.protocol import RequestResponseMetadata
 
 try:
     from vllm.utils import random_uuid

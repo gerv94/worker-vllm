@@ -1,6 +1,7 @@
-from transformers import AutoTokenizer
 import os
 from typing import Union
+
+from transformers import AutoTokenizer
 
 class TokenizerWrapper:
     def __init__(self, tokenizer_name_or_path, tokenizer_revision, trust_remote_code):
