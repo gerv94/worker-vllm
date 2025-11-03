@@ -43,7 +43,7 @@ class vLLMEngine:
         self.min_batch_size = int(os.getenv("MIN_BATCH_SIZE", DEFAULT_MIN_BATCH_SIZE))
 
     def _get_tokenizer_for_chat_template(self):
-        """Get tokenizer for chat template application"""
+        """Get tokenizer for chat template application """
         if self.tokenizer is not None:
             return self.tokenizer
         else:
