@@ -1,6 +1,6 @@
 <div align="center">
 
-# OpenAI-Compatible vLLM Serverless Endpoint Worker
+# OpenAI-Compatible vLLM Serverless Endpoint Worker (Improved)
 
 Deploy OpenAI-Compatible Blazing-Fast LLM Endpoints powered by the [vLLM](https://github.com/vllm-project/vllm) Inference Engine on RunPod Serverless with just a few clicks.
 
