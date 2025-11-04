@@ -48,6 +48,10 @@
       {
         "key": "MODEL_NAME",
         "value": "HuggingFaceTB/SmolLM2-135M-Instruct"
+      },
+      {
+          "key": "EMBEDDING_MODEL_NAME",
+          "value": "intfloat/e5-mistral-7b-instruct"
       }
     ],
     "allowedCudaVersions": [
