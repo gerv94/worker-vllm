@@ -19,6 +19,7 @@ DEFAULT_ARGS = {
     "pipeline_parallel_size": int(os.getenv('PIPELINE_PARALLEL_SIZE', 1)),
     "tensor_parallel_size": int(os.getenv('TENSOR_PARALLEL_SIZE', 1)),
     "served_model_name": os.getenv('SERVED_MODEL_NAME', None),
+    "embedding_model_name": os.getenv('EMBEDDING_MODEL_NAME', None),
     "tokenizer": os.getenv('TOKENIZER', None),
     "skip_tokenizer_init": os.getenv('SKIP_TOKENIZER_INIT', 'False').lower() == 'true',
     "tokenizer_mode": os.getenv('TOKENIZER_MODE', 'auto'),

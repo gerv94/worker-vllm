@@ -27,6 +27,18 @@
         }
       },
       "timeout": 30000
+    },
+    {
+      "name": "embeddings_test",
+      "input": {
+        "openai_route": "/v1/embeddings",
+        "openai_input": {
+          "input": "The quick brown fox jumps over the lazy dog",
+          "model": "intfloat/e5-mistral-7b-instruct",
+          "encoding_format": "float"
+        }
+      },
+      "timeout": 30000
     }
   ],
   "config": {

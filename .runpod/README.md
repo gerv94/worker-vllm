@@ -24,8 +24,9 @@ All behaviour is controlled through environment variables:
 | `CUSTOM_CHAT_TEMPLATE`              | Custom chat template override                     |                     | Jinja2 template string                                             |
 | `ENABLE_AUTO_TOOL_CHOICE`           | Enable automatic tool selection                   | false               | boolean (true or false)                                            |
 | `TOOL_CALL_PARSER`                  | Parser for tool calls                             |                     | "mistral", "hermes", "llama3_json", "granite", "deepseek_v3", etc. |
-| `REASONING_PARSER`                  | Parser for reasoning-capable models               |                     | "deepseek_r1", "qwen3", "granite", "hunyuan_a13b"                  |
+|| `REASONING_PARSER`                  | Parser for reasoning-capable models               |                     | "deepseek_r1", "qwen3", "granite", "hunyuan_a13b"                  |
 | `OPENAI_SERVED_MODEL_NAME_OVERRIDE` | Override served model name in API                 |                     | String                                                             |
+| `EMBEDDING_MODEL_NAME`              | Path of the embedding model weights               |                     | Local folder or Hugging Face repo ID (e.g., 'BAAI/bge-m3')        |
 | `MAX_CONCURRENCY`                   | Maximum concurrent requests                       | 300                 | Integer                                                            |
 
 For complete configuration options, see the [full configuration documentation](https://github.com/runpod-workers/worker-vllm/blob/main/docs/configuration.md).
@@ -88,6 +89,23 @@ For direct text generation without chat format:
 }
 ```
 
+#### Embeddings
+
+Requires `EMBEDDING_MODEL_NAME` environment variable to be set.
+
+```json
+{
+  "input": {
+    "openai_route": "/v1/embeddings",
+    "openai_input": {
+      "input": "The quick brown fox jumps over the lazy dog",
+      "model": "intfloat/e5-mistral-7b-instruct",
+      "encoding_format": "float"
+    }
+  }
+}
+```
+
 #### List Models
 
 ```json
@@ -144,6 +162,20 @@ For external clients and SDKs, use the `/openai/v1` path prefix with your RunPod
   "prompt": "The capital of France is",
   "max_tokens": 100,
   "temperature": 0.7
+}
+```
+
+#### Embeddings
+
+**Path:** `/openai/v1/embeddings`
+
+Requires `EMBEDDING_MODEL_NAME` environment variable to be set to a supported embedding model (e.g., `intfloat/e5-mistral-7b-instruct`, `BAAI/bge-m3`, `jinaai/jina-embeddings-v3`).
+
+```json
+{
+  "model": "intfloat/e5-mistral-7b-instruct",
+  "input": "The quick brown fox jumps over the lazy dog",
+  "encoding_format": "float"
 }
 ```
 

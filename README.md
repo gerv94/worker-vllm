@@ -44,20 +44,21 @@ Deploy OpenAI-Compatible Blazing-Fast LLM Endpoints powered by the [vLLM](https:
 
 Configure worker-vllm using environment variables:
 
-| Environment Variable                | Description                                       | Default             | Options                                                            |
-| ----------------------------------- | ------------------------------------------------- | ------------------- | ------------------------------------------------------------------ |
-| `MODEL_NAME`                        | Path of the model weights                         | "facebook/opt-125m" | Local folder or Hugging Face repo ID                               |
-| `HF_TOKEN`                          | HuggingFace access token for gated/private models |                     | Your HuggingFace access token                                      |
-| `MAX_MODEL_LEN`                     | Model's maximum context length                    |                     | Integer (e.g., 4096)                                               |
-| `QUANTIZATION`                      | Quantization method                               |                     | "awq", "gptq", "squeezellm", "bitsandbytes"                        |
-| `TENSOR_PARALLEL_SIZE`              | Number of GPUs                                    | 1                   | Integer                                                            |
-| `GPU_MEMORY_UTILIZATION`            | Fraction of GPU memory to use                     | 0.95                | Float between 0.0 and 1.0                                          |
-| `MAX_NUM_SEQS`                      | Maximum number of sequences per iteration         | 256                 | Integer                                                            |
-| `CUSTOM_CHAT_TEMPLATE`              | Custom chat template override                     |                     | Jinja2 template string                                             |
-| `ENABLE_AUTO_TOOL_CHOICE`           | Enable automatic tool selection                   | false               | boolean (true or false)                                            |
-| `TOOL_CALL_PARSER`                  | Parser for tool calls                             |                     | "mistral", "hermes", "llama3_json", "granite", "deepseek_v3", etc. |
-| `OPENAI_SERVED_MODEL_NAME_OVERRIDE` | Override served model name in API                 |                     | String                                                             |
-| `MAX_CONCURRENCY`                   | Maximum concurrent requests                       | 30                  | Integer                                                            |
+| Environment Variable                | Description                                       | Default             | Options                                                             |
+| ----------------------------------- | ------------------------------------------------- | ------------------- |---------------------------------------------------------------------|
+| `MODEL_NAME`                        | Path of the model weights                         | "facebook/opt-125m" | Local folder or Hugging Face repo ID                                |
+| `HF_TOKEN`                          | HuggingFace access token for gated/private models |                     | Your HuggingFace access token                                       |
+| `MAX_MODEL_LEN`                     | Model's maximum context length                    |                     | Integer (e.g., 4096)                                                |
+| `QUANTIZATION`                      | Quantization method                               |                     | "awq", "gptq", "squeezellm", "bitsandbytes"                         |
+| `TENSOR_PARALLEL_SIZE`              | Number of GPUs                                    | 1                   | Integer                                                             |
+| `GPU_MEMORY_UTILIZATION`            | Fraction of GPU memory to use                     | 0.95                | Float between 0.0 and 1.0                                           |
+| `MAX_NUM_SEQS`                      | Maximum number of sequences per iteration         | 256                 | Integer                                                             |
+| `CUSTOM_CHAT_TEMPLATE`              | Custom chat template override                     |                     | Jinja2 template string                                              |
+| `ENABLE_AUTO_TOOL_CHOICE`           | Enable automatic tool selection                   | false               | boolean (true or false)                                             |
+| `TOOL_CALL_PARSER`                  | Parser for tool calls                             |                     | "mistral", "hermes", "llama3_json", "granite", "deepseek_v3", etc.  |
+| `OPENAI_SERVED_MODEL_NAME_OVERRIDE` | Override served model name in API                 |                     | String                                                              |
+| `EMBEDDING_MODEL_NAME`              | Path of the embedding model weights               |                     | Local folder or Hugging Face repo ID (e.g., 'BAAI/bge-m3')          |
+| `MAX_CONCURRENCY`                   | Maximum concurrent requests                       | 30                  | Integer                                                             |
 
 For the complete list of all available environment variables, examples, and detailed descriptions: **[Configuration](docs/configuration.md)**
 
@@ -117,7 +118,7 @@ You can deploy **any model on Hugging Face** that is supported by vLLM. For the 
 
 # Usage: OpenAI Compatibility
 
-The vLLM Worker is fully compatible with OpenAI's API, and you can use it with any OpenAI Codebase by changing only 3 lines in total. The supported routes are <ins>Chat Completions</ins> and <ins>Models</ins> - with both streaming and non-streaming.
+The vLLM Worker is fully compatible with OpenAI's API, and you can use it with any OpenAI Codebase by changing only 3 lines in total. The supported routes are <ins>Chat Completions</ins>, <ins>Completions</ins>, <ins>Embeddings</ins>, and <ins>Models</ins> - with both streaming and non-streaming (embeddings are non-streaming only).
 
 ## Modifying your OpenAI Codebase to use your deployed vLLM Worker
 
@@ -289,6 +290,21 @@ This is the format used for GPT-4 and focused on instruction-following and chat.
   # Print the response
   print(response.choices[0].message.content)
   ```
+
+### Embeddings:
+
+Generate text embeddings using embedding models. To use this endpoint, set the `EMBEDDING_MODEL_NAME` environment variable to a supported embedding model (e.g., `intfloat/e5-mistral-7b-instruct`, `BAAI/bge-m3`, `jinaai/jina-embeddings-v3`).
+
+```python
+# Create embeddings
+response = client.embeddings.create(
+    model="<YOUR EMBEDDING MODEL>",
+    input="The quick brown fox jumps over the lazy dog",
+    encoding_format="float"
+)
+# Print the embedding vector
+print(response.data[0].embedding)
+```
 
 ### Getting a list of names for available models:
 

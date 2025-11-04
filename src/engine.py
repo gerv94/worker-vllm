@@ -10,7 +10,8 @@ from typing import AsyncGenerator
 from vllm import AsyncLLMEngine
 from vllm.entrypoints.openai.serving_chat import OpenAIServingChat
 from vllm.entrypoints.openai.serving_completion import OpenAIServingCompletion
-from vllm.entrypoints.openai.protocol import ChatCompletionRequest, CompletionRequest, ErrorResponse
+from vllm.entrypoints.openai.serving_embedding import OpenAIServingEmbedding
+from vllm.entrypoints.openai.protocol import ChatCompletionRequest, CompletionRequest, EmbeddingRequest, ErrorResponse
 from vllm.entrypoints.openai.serving_models import BaseModelPath, LoRAModulePath, OpenAIServingModels
 
 from utils import DummyRequest, JobInput, BatchSize, create_error_response
@@ -237,12 +238,32 @@ class OpenAIvLLMEngine(vLLMEngine):
             models=self.serving_models,
             request_logger=None,
         )
+        
+        # Initialize embedding engine if EMBEDDING_MODEL_NAME is set
+        embedding_model_name = os.getenv("EMBEDDING_MODEL_NAME")
+        if embedding_model_name:
+            try:
+                self.embedding_engine = OpenAIServingEmbedding(
+                    engine_client=self.llm,
+                    model_config=self.model_config,
+                    models=self.serving_models,
+                    request_logger=None,
+                )
+                logging.info(f"Initialized embedding engine with model: {embedding_model_name}")
+            except Exception as e:
+                logging.warning(f"Failed to initialize embedding engine: {e}")
+                self.embedding_engine = None
+        else:
+            self.embedding_engine = None
     
     async def generate(self, openai_request: JobInput):
         if openai_request.openai_route == "/v1/models":
             yield await self._handle_model_request()
         elif openai_request.openai_route in ["/v1/chat/completions", "/v1/completions"]:
             async for response in self._handle_chat_or_completion_request(openai_request):
+                yield response
+        elif openai_request.openai_route == "/v1/embeddings":
+            async for response in self._handle_embeddings_request(openai_request):
                 yield response
         else:
             yield create_error_response("Invalid route").model_dump()
@@ -298,4 +319,25 @@ class OpenAIvLLMEngine(vLLMEngine):
                 if self.raw_openai_output:
                     batch = "".join(batch)
                 yield batch
+    
+    async def _handle_embeddings_request(self, openai_request: JobInput):
+        if not self.embedding_engine:
+            yield create_error_response(
+                "Embeddings endpoint not available. Please set EMBEDDING_MODEL_NAME environment variable with a supported embedding model (e.g., 'intfloat/e5-mistral-7b-instruct', 'BAAI/bge-m3', 'jinaai/jina-embeddings-v3').",
+                "EmbeddingNotAvailableError"
+            ).model_dump()
+            return
+        
+        try:
+            request = EmbeddingRequest(**openai_request.openai_input)
+        except Exception as e:
+            yield create_error_response(str(e)).model_dump()
+            return
+        
+        dummy_request = DummyRequest()
+        try:
+            response = await self.embedding_engine.create_embedding(request, raw_request=dummy_request)
+            yield response.model_dump()
+        except Exception as e:
+            yield create_error_response(str(e)).model_dump()
             
