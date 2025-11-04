@@ -1,9 +1,12 @@
 import runpod
+
+from engine import OpenAIvLLMEngine, vLLMEngine
 from utils import JobInput
-from engine import vLLMEngine, OpenAIvLLMEngine
+
 
 vllm_engine = vLLMEngine()
 openai_vllm_engine = OpenAIvLLMEngine(vllm_engine)
+
 
 async def handler(job):
     job_input = JobInput(job["input"])
@@ -11,6 +14,7 @@ async def handler(job):
     results_generator = engine.generate(job_input)
     async for batch in results_generator:
         yield batch
+
 
 runpod.serverless.start(
     {
